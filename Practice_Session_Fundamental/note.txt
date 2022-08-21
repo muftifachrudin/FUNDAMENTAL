@@ -1,0 +1,8 @@
+Index : 0, 1, 2,dst
+Random : 0,0 - 0,999
+Boolean :
+False : 0, "" , null, undefined, NaN
+True : else Flase (object kosong True, object number, strings, array,)
+
+
+

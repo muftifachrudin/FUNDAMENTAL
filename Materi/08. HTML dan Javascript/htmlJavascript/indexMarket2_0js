@@ -1,0 +1,385 @@
+////////////////
+/* Init Value */
+////////////////
+
+let products = [
+  {
+    id: 23019300001,
+    category: "Fast Food",
+    name: "Noodle",
+    price: 3500,
+    stock: 9,
+  },
+  {
+    id: 23019300002,
+    category: "Electronic",
+    name: "Handphone",
+    price: 430000,
+    stock: 8,
+  },
+  {
+    id: 23019300003,
+    category: "Cloth",
+    name: "Hoodie",
+    price: 30000,
+    stock: 8,
+  },
+  {
+    id: 23019300004,
+    category: "Fruit",
+    name: "Apple",
+    price: 10000,
+    stock: 8,
+  }
+];
+
+const categories = ["All", "Fast Food", "Electronic", "Cloth", "Fruit"];
+
+let carts = []
+
+// Calculate All Items
+
+const fnPayment = () => {
+  const listPayment = carts.map((cart) => {
+    const {id, category, name, price} = cart
+
+    return `<p> ${id} | ${category} | ${name} | ${price} </p>`
+  })
+
+  let subTotal = 0
+  carts.forEach((cart) => {
+    const {price, qty} = cart
+    subTotal += (price * qty)
+  })
+
+  const ppn = subTotal * 0.11
+  const finalTotal = subTotal + ppn
+
+  const listDetail = listPayment.join("")
+  const listTotal = `
+    <h3> Sub Total Rp.${subTotal.toLocaleString("id")}</h3>
+    <h3> PPN Rp.${ppn.toLocaleString("id")}</h3>
+    <h3> Total Rp.${finalTotal.toLocaleString("id")}</h3>
+    `
+  document.getElementById("payment").innerHTML = listDetail + listTotal
+}
+
+////////////////
+/* Render List */
+////////////////
+
+const fnRenderList = (index) => {
+  const listProduct = products.map((product) => {
+    const { id, category, name, price, stock } = product;
+    
+    if(id != index) {
+      return `
+      <tr>
+        <td>${id}</td>
+        <td>${category}</td>
+        <td>${name}</td>
+        <td>${price}</td>
+        <td>${stock}</td>
+        <td><input type="button" value="Add" onclick ="fnAdd(${id})"></td>
+        <td><input type="button" value="Delete" onclick ="fnDelete(${id})"></td>
+        <td><input type="button" value="Edit" onclick ="fnEdit(${id})"></td>
+      </tr>`;
+    }
+
+    return `
+      <tr>
+        <td>${id}</td>
+        <td>${category}</td>
+        <td><input value="${name}" type="text" id="nameEdit"></td>
+        <td><input value="${price}" type="text" id="priceEdit"></td>
+        <td><input value="${stock}" type="text" id="stockEdit"></td>
+        <td><input type="button" value="Add" disabled></td>
+        <td><input type="button" value="Save" onclick ="fnSave(${id})"></td>
+        <td><input type="button" value="Cancel" onclick ="fnCancel()"></td>
+      </tr>`;
+  });
+
+  const listCategory = categories.map((category) => {
+    return `<option value="${category}">${category}</option>`;
+  });
+
+  //Data Products
+  document.getElementById("render").innerHTML = listProduct.join("");
+  //Category Product
+  document.getElementById("catFilter").innerHTML = listCategory.join("");
+  document.getElementById("catInput").innerHTML = listCategory.join("");
+};
+
+///////////////////
+/* Add to Cart  */
+//////////////////
+
+const fnAdd = (index) => {
+
+  // Dapatkan object produk yang terpilih (diklik)
+  const selectedProduct = products.find((product) => {return product.id == index})
+
+  // Jika produk tidak ditemukan dicarts
+  if(selectedProduct.stock == 0){
+    alert('Stock Habis')
+
+  }else{
+    const foundCart = carts.find((cart) => { return cart.id == index})
+
+    if(!foundCart) {
+      
+      const {id, category, name, price} = selectedProduct
+      carts.push({id, category, name, price, qty : 1})
+  
+    }else {
+      const idx = carts.findIndex((cart) => {return cart.id == index})
+  
+      carts[idx].qty ++
+  
+    }
+     
+    const idx = products.findIndex((product) => {return product.id == index})
+    products[idx].stock --
+  }
+
+  fnRenderList()
+
+  fnRenderCart()
+
+}
+
+///////////
+/* Edit */
+///////////
+
+const fnEdit = (index) => {
+  fnRenderList(index)
+}
+
+///////////
+/* Cancel */
+///////////
+
+const fnCancel = (index) => {
+  fnRenderList()
+  
+}
+
+///////////
+/* Save */
+///////////
+
+const fnSave = (index) => {
+  // get all new data from text box
+  const name = document.getElementById("nameEdit").value
+  const price = document.getElementById("priceEdit").value
+  const stock = document.getElementById("stockEdit").value
+
+  //found index
+  const found = products.findIndex((product) => {return product.id == index})
+
+  //change data
+  products[found] = {...products[found], name, price, stock}
+
+  fnRenderList()
+}
+
+///////////
+/* Delete Product*/
+///////////
+
+const fnDelete = (index) => {
+
+  const idxProduct = products.findIndex((product) => {return product.id == index})
+
+  products = products.filter((product) => {
+    return product.id != index
+  })
+  
+  fnRenderList()
+}
+
+////////////////
+/* Delete Cart*/
+///////////////
+
+const fnDeleteCart = (index) => {
+  // temukan index product pada array product
+  const idxProduct = products.findIndex((product) => {return product.id == index})
+  // temukan index product pada array cart
+  const idxCart = carts.findIndex((cart) => {return cart.id == index})
+  //menjumlahkan stock pada array products dengan qty pada array carts
+  products[idxProduct].stock += carts[idxCart].qty
+   //menghapus data dari carts
+  carts = carts.filter((cart) => {
+    return cart.id != index
+  })
+  
+
+  fnRenderList()
+  fnRenderCart()
+
+}
+
+
+///////////////////
+/* Render Carts  */
+//////////////////
+
+
+const fnRenderCart = () => {
+  const listCart = carts.map((cart) => {
+    const {id, category, name, price, qty} = cart
+    return `
+    <tr>
+        <td>${id}</td>
+        <td>${category}</td>
+        <td>${name}</td>
+        <td>${price}</td>
+        <td>${qty}</td>
+        <td><input type="button" value="Delete" onclick ="fnDeleteCart(${id})"></td>
+      </tr>
+    `
+  })
+
+  document.getElementById("carts").innerHTML = listCart.join("")
+}
+
+///////////////////
+/* Render Filter */
+//////////////////
+
+const fnRenderFilter = (arr) => {
+  const listProduct = arr.map((product) => {
+    const { id, category, name, price, stock } = product;
+    return `
+        <tr>
+          <td>${id}</td>
+          <td>${category}</td>
+          <td>${name}</td>
+          <td>${price}</td>
+          <td>${stock}</td>
+          <td><input type="button" value="Add" onclick ="fnAdd(${id})"></td>
+          <td><input type="button" value="Delete" onclick ="fnDelete(${id})"></td>
+          <td><input type="button" value="Edit" onclick ="fnEdit(${id})"></td>
+
+        </tr>
+    `
+  });
+
+  //Data Products
+  document.getElementById("render").innerHTML = listProduct.join("");
+};
+
+//////////////////////
+/* Reset Filter     */
+/////////////////////
+
+const fnResetFilter = () => {
+  const inputTags = document.getElementsByName("txtFilter")
+  
+  for(const input of inputTags){
+    input.value = ""
+  }
+  fnRenderList()
+}
+
+
+////////////////
+/* Input Data */
+////////////////
+
+const fnInputData = () => {
+  //Get data from html
+  const name = document.getElementById("nameInput").value;
+  const price = parseInt(document.getElementById("priceInput").value);
+  const category = document.getElementById("catInput").value;
+  const stock = document.getElementById("stockInput").value;
+
+  //create data object
+  const time = new Date();
+  const id = time.getTime();
+
+  //Push New data object
+  products.push({ id, name, price, category, stock });
+
+  //Clean all text box
+  document.getElementById("nameInput").value = "";
+  document.getElementById("priceInput").value = "";
+  document.getElementById("stockInput").value = "";
+
+  fnRenderList();
+};
+
+/////////////////
+/* Filter Name */
+////////////////
+
+const fnFilterName = () => {
+  //get data from user
+  // keyword = 'A'
+  const keyword = document.getElementById("nameFilter").value;
+  
+  // Filtering
+  // [{name: "Apple"}, ]
+  const filterResult = products.filter((product) => {
+    //product = {name: "Apple"}
+    //turn to lowercase untuk menyamakan inputan dan data
+
+    //hasil data name pada filter
+    //nameLow = 'apple'
+    const nameLow = product.name.toLowerCase();
+    
+    //inputan yang diketik
+    //keywordLow = 'a'
+    const keywordLow = keyword.toLowerCase();
+    
+    return nameLow.includes(keywordLow);
+  });
+  
+  fnRenderFilter(filterResult);
+};
+
+//////////////////
+/* Filter Price */
+/////////////////
+
+const fnFilterPrice = () => {
+  const min = document.getElementById("min").value
+  
+  const max = document.getElementById("max").value
+  
+  let filterResult = products
+  //all text boxes don't empty
+  //min = ""
+  //max = ""
+  if(!(min == "" || max == "")){
+    //filtering
+    filterResult = products.filter((product) => {
+      const {price} = product
+      return price >= min && price <= max
+    })
+    
+  }
+  
+  fnRenderFilter(filterResult)
+  
+}
+
+//////////////////////
+/* Filter Category */
+/////////////////////
+const fnFilterCategory = () => {
+  const selectedCategory = document.getElementById("catFilter").value
+
+  let filterResult = products
+  
+  if(selectedCategory !== "All"){
+    filterResult = products.filter((product) => {
+      return product.category == selectedCategory
+    })
+  }
+  fnRenderFilter(filterResult)
+}
+
+fnRenderList();

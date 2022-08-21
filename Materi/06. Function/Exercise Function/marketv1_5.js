@@ -1,0 +1,183 @@
+///////////////
+// MARKET V.1.5
+///////////////
+
+/*
+  1. Ubah looping yang menggunakan for loop menjadi menggunakan method for each beberapa diantaranya:
+      a. Membuat list / daftar buah
+      b. Meminta jumlah qty untuk setiap produk
+      c. Menghitung total harga
+      d. Membuat detail belanja
+
+  2. Buatlah satu buah function yang berfungsi untuk membuat list produk. Jika sekarang masih menggunakan copy paste
+     Maka buatlah satu function yang akan mengerjakan ini, dan panggil functon ini di setiap kita ingin menampilkan list
+     buah
+
+*/
+
+
+// [name, price, stock]
+var fruits = [
+  ["Apple", 10000, 5],
+  ["Grape", 15000, 7],
+  ["Orange", 20000, 8],
+];
+
+//Function untuk menampilkan list buah
+var createList = (arr, header) => {
+  // Variable awal yang akan menyimpan List buah
+  var list = `${header}\n\n`
+  // Variable awal yang akan menyimpan list buah
+  arr.forEach((val, i) => {
+    // Setiap buahnya akan dibuatkan satu list dengan for each tertentu dan ditambahkan ke variable fruitlist
+    list += `${i}. ${val[0]} || Rp.${val[1]} || stock : ${val[2]}\n`
+    
+  });
+  // Return list
+  return list
+}
+
+// [name, price, qty, totalPrice]
+var cart = [];
+
+// menggunakan while () untuk looping
+while (true) {
+  var menu = parseInt(
+    prompt(`
+        Apa yang ingin Anda lakukan :
+        1. Menampilkan buah
+        2. Menambahkan buah
+        3. Menghapus buah
+        4. Membeli buah
+        5. Exit
+    `)
+  );
+
+  if (menu == 1) {
+
+    // Menampilkan daftar buah
+    alert(createList(fruits, "Daftar Buah"));
+    
+  } else if (menu == 2) {
+    // Input Nama, Harga, Stock untuk buah yang baru
+    var newName = prompt("Masukan nama buah :");
+    var newPrice = parseInt(prompt("Masukan jumlah harga buah :"));
+    var newStock = parseInt(prompt("Masukan jumlah stock buah :"));
+    
+    // Array yang sudah jadi, di push ke array fruits
+    fruits.push([newName, newPrice, newStock]);
+    // Menampilkan daftar buah
+    alert(createList(fruits, "Daftar Buah"));
+
+
+  } else if (menu == 3) {
+    // Menampilkan list buah setelah selesai menambahkan satu buah baru
+    var fruitList = `Menghapus Buah\n\n`;
+
+    for (var i = 0; i < fruits.length; i++) {
+      fruitList += `${i}. ${fruits[i][0]} || Rp.${fruits[i][1]} || ${fruits[i][2]} \n`;
+    }
+    // 0. Apple
+    // dst
+
+    // Menampilkan daftar buah dan memilih buah untuk dihapus
+    // Index dari buah terpilih akan disimpan ke variable selIndex
+    var selIndex = parseInt(prompt(createList(fruits, "Daftar Buah")));
+
+    // Menghapus daftar buah dan memilih buah untuk dihapus
+    // index dari buah terpilih akan disimpan ke variable selIndex
+    fruits.splice(selIndex, 1);
+
+    // Menampilkan daftar buah
+    alert(createList(fruits, "Daftar Buah"));
+
+  } else if (menu == 4) {
+    while (true) {
+
+      // index buah yang dipilih untuk dibeli
+      var selIndex = parseInt(prompt(createList(fruits, "Daftar Buah")));
+
+      var selName = fruits[selIndex][0];
+      var selPrice = fruits[selIndex][1];
+      var selStock = fruits[selIndex][2];
+
+      // LOOP untuk meminta quantity
+      while (true) {
+        // Jumlah stock yang ingin dibeli
+        var selQty = parseInt(
+          prompt(
+            `Masukan Quantity untuk ${fruits[selIndex][0]}, Stock : ${fruits[selIndex][2]}`
+          )
+        );
+
+        if (selQty > selStock) {
+          alert(
+            `Quantity yang diminta ${selQty}, melebihi jumlah Stock ${selStock}`
+          );
+        } else {
+          // masukkan ke keranjang (cart)
+          cart.push([selName, selPrice, selQty]);
+
+          // kurangi stock buah yang dipesan
+          // 7-2
+          fruits[selIndex][2] -= selQty;
+
+          break;
+        }
+      }
+
+      // tampilkan isi keranjang
+      var cartList = createList(cart, "Keranjang")
+
+      var again = prompt(`${cartList}\n\nIngin belanja lagi ? (ya / tidak)`);
+
+      //kluar dari loop 'membeli buah' karena ad keyword break ketika user menjawab tidak
+      if (again == "tidak") {
+        break;
+      }
+    }
+
+    //hitung belanjaan
+    var finalPrice = 0;
+
+    cart.forEach((cart) => {
+      
+      cart[i][3] = cart[i][1] * cart[i][2];
+
+      finalPrice += cart[i][3];
+    })
+
+    var finalReport = "";
+
+    cart.forEach((cart) => {
+      finalReport += `${cart[i][0]} : ${cart[i][1]} * ${cart[i][2]} = ${cart[i][3]}\n`;
+    })
+
+    //while bill
+    while (true) {
+      //menampilkan informasi belanja termasuk total uang yang harus dibayar
+      var money = parseInt(
+        prompt(`Detail Belanja\n\n${finalReport}\n\nTotal : ${finalPrice}`)
+      );
+
+      var margin = Math.abs(money - finalPrice);
+
+      if (money < finalPrice) {
+        alert(
+          `Uang yang Anda masukan masih kurang ${margin}, total belanja ${finalPrice}`
+        );
+      } else {
+        if (money > finalPrice) {
+          alert(`Terima Kasih, uang kembalian Anda ${margin}`);
+        } else {
+          alert(`TerimaKasih`);
+        }
+        break;
+      }
+
+      cart = [];
+    }
+  } else {
+    break;
+  }
+}
